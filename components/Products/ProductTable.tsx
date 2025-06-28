@@ -14,6 +14,8 @@ import {
   getSortedRowModel,
   SortingState,
   useReactTable,
+  ColumnFiltersState,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -38,6 +40,7 @@ export default function ProductTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -49,18 +52,28 @@ export default function ProductTable<TData, TValue>({
     state: {
       pagination,
       sorting,
+      columnFilters,
     },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
   });
 
   return (
     <div className="flex flex-col gap-3 mb-8 mt-6">
       <div className="flex items-center justify-between">
-        <Input placeholder="Search by name..." className="max-w-sm h-10" />
+        <Input
+          placeholder="Search By Name..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("name")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm h-10"
+        />
         <div>
           <CategoryDropDown />
         </div>
