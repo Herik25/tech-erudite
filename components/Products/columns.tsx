@@ -1,8 +1,17 @@
 "use client";
 
-import { ReactNode } from "react";
-import { ColumnDef } from "@tanstack/react-table";
+import React, { ReactNode } from "react";
+import { Column, ColumnDef } from "@tanstack/react-table";
 import ProductDropDown from "./ProductDropDown";
+import { IoArrowDown, IoArrowUp } from "react-icons/io5";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 
 export type Product = {
   id: string;
@@ -27,10 +36,45 @@ export type Product = {
   createdAt: Date;
 };
 
+type SortableHeaderProps = {
+  column: Column<any, unknown>;
+  label: String;
+};
+
+const SortableHeader: React.FC<SortableHeaderProps> = ({ column, label }) => {
+  const isSorted = column.getIsSorted();
+  const SortingIcon =
+    isSorted === "asc"
+      ? ArrowDown
+      : isSorted === "desc"
+      ? ArrowUp
+      : ArrowUpDown;
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger className="" asChild>
+        <Button variant={"ghost"} aria-label={`Sort by ${label}`}>
+          {label}
+          <SortingIcon className=" h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" side="bottom">
+        <DropdownMenuItem onClick={() => column.toggleSorting(true)}>
+          <ArrowUp className="mr-2 h-4 w-4" />
+          Asc
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => column.toggleSorting(false)}>
+          <ArrowDown className="mr-2 h-4 w-4" />
+          Desc
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
-    header: "Name",
     cell: ({ row }) => {
       const Icon = row.original.icon;
       const name = row.original.name;
@@ -44,27 +88,28 @@ export const columns: ColumnDef<Product>[] = [
         </div>
       );
     },
+    header: ({ column }) => <SortableHeader column={column} label="Name" />,
   },
   {
     accessorKey: "sku",
-    header: "Sku",
+    header: ({ column }) => <SortableHeader column={column} label="Sku" />,
   },
   {
     accessorKey: "price",
-    header: "Price",
+    header: ({ column }) => <SortableHeader column={column} label="Price" />,
     cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: ({ column }) => <SortableHeader column={column} label="Category" />,
   },
   {
     accessorKey: "quantityInStock",
-    header: "Quantity",
+    header: ({ column }) => <SortableHeader column={column} label="Quantity" />,
   },
   {
     accessorKey: "supplier",
-    header: "Supplier",
+    header: ({ column }) => <SortableHeader column={column} label="Supplier" />,
   },
   {
     accessorKey: "actions",
