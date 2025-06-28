@@ -4,7 +4,7 @@ import { Row } from "@tanstack/react-table";
 import { Product } from "./columns";
 
 import { FaRegEdit } from "react-icons/fa";
-import { MdContentCopy, MdOutlineDelete } from "react-icons/md";
+import { MdOutlineDelete } from "react-icons/md";
 
 import {
   DropdownMenu,
@@ -28,9 +28,10 @@ type MenuItem = {
 };
 
 export default function ProductDropDown({ row }: { row: Row<Product> }) {
-  const { setSelectedProduct, setOpenDialog } = useProductStore();
+  const { setSelectedProduct, setOpenDialog, setOpenProductDialog } =
+    useProductStore();
   const menuItems: MenuItem[] = [
-    { icon: <MdContentCopy />, label: "Copy", className: "" },
+    // { icon: <MdContentCopy />, label: "Copy", className: "" },
     { icon: <FaRegEdit />, label: "Edit", className: "" },
     { separator: true },
     {
@@ -43,6 +44,11 @@ export default function ProductDropDown({ row }: { row: Row<Product> }) {
   function handleClickedItem(item: MenuItem) {
     if (item.label === "Delete") {
       setOpenDialog(true);
+      setSelectedProduct(row.original);
+    }
+
+    if (item.label === "Edit") {
+      setOpenProductDialog(true);
       setSelectedProduct(row.original);
     }
   }
