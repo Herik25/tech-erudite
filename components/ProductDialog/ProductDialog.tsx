@@ -1,11 +1,23 @@
 "use client";
 import React, { useState } from "react";
 
+export type ProductCategory =
+  | "Electronics"
+  | "Clothing"
+  | "Books"
+  | "Sports"
+  | "Furniture"
+  | "Toys"
+  | "Beauty"
+  | "Home Decor"
+  | "Home Appliances"
+  | "Others";
+
 interface FormData {
   productName: string;
   sku: string;
   supplier: string;
-  category: string;
+  category: ProductCategory;
   quantity: string;
   price: string;
   selectedIcon: React.ReactNode | null;
@@ -41,10 +53,12 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import IconSelector from "./IconSelector";
+import { useProductStore } from "../useProductStore";
+import { toast } from "sonner";
 
 export default function ProductDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  //   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     productName: "",
     sku: "",
@@ -55,14 +69,28 @@ export default function ProductDialog() {
     selectedIcon: null,
   });
   const [errors, setErrors] = useState<FormErrors>({});
+  const {
+    allProducts,
+    addProduct,
+    isLoading,
+    openProductDialog,
+    setOpenProductDialog,
+    setSelectedProduct,
+    selectedProduct,
+    updateProduct,
+  } = useProductStore();
 
-  const categories = [
+  const categories: ProductCategory[] = [
     "Electronics",
     "Clothing",
     "Books",
-    "Home & Garden",
     "Sports",
-    "Food",
+    "Furniture",
+    "Toys",
+    "Beauty",
+    "Home Decor",
+    "Home Appliances",
+    "Others",
   ];
 
   const validateForm = (): boolean => {
@@ -123,7 +151,7 @@ export default function ProductDialog() {
       return;
     }
 
-    setIsLoading(true);
+    // setIsLoading(true);
 
     try {
       // Simulate API call
@@ -131,25 +159,28 @@ export default function ProductDialog() {
 
       const newProduct = {
         id: Date.now().toString(),
-        productName: formData.productName,
+        name: formData.productName,
         sku: formData.sku,
         supplier: formData.supplier,
         category: formData.category,
-        quantity: parseInt(formData.quantity),
+        quantityInStock: parseInt(formData.quantity),
         price: parseFloat(formData.price),
-        selectedIcon: formData.selectedIcon,
-        createdAt: new Date().toISOString(),
+        icon: formData.selectedIcon,
+        createdAt: new Date(),
       };
 
       console.log("New Product Created:", newProduct);
+      const result = await addProduct(newProduct);
+
+      if (result) {
+        toast.success("product added successfully!");
+        setIsOpen(false);
+      }
 
       // Reset form and close dialog
       handleReset();
-      setIsOpen(false);
     } catch (error) {
       console.error("Error adding product:", error);
-    } finally {
-      setIsLoading(false);
     }
   };
 

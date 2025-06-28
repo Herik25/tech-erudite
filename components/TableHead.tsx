@@ -1,11 +1,21 @@
+"use client";
+
+import { useEffect } from "react";
 import ProductDialog from "./ProductDialog/ProductDialog";
 import { columns } from "./Products/columns";
 import { products } from "./Products/productData";
 import ProductTable from "./Products/ProductTable";
 import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { useProductStore } from "./useProductStore";
 
 export default function TableHead() {
+  const { allProducts, loadProducts } = useProductStore();
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
   return (
     <div>
       <Card className="flex flex-col shadow-none font-poppins border-none">
@@ -21,7 +31,7 @@ export default function TableHead() {
           </div>
         </CardHeader>
         <CardContent>
-          <ProductTable columns={columns} data={products} />
+          <ProductTable columns={columns} data={allProducts} />
         </CardContent>
       </Card>
     </div>

@@ -7,6 +7,7 @@ import React, {
   ReactNode,
   ComponentType,
   useEffect,
+  useRef,
 } from "react";
 import {
   Dialog,
@@ -51,25 +52,29 @@ export const IconProvider = ({
 }) => {
   const [openDialog, updateOpenDialog] = useState(false);
   const [allIcons, setAllIcons] = useState<SingleIcon[]>(iconsArray);
+  const isInitialMount = useRef(true);
 
   const updateSelectedIcon = (icon: ReactNode) => {
     onUpdateIcon(icon);
   };
 
   const triggerIconSelection = (icon: string) => {
-    try {
-      const iconNode = convertStringToIcon(icon, allIcons);
-      if (iconNode) {
-        const updatedIcons = allIcons.map((singleIcon) => ({
-          ...singleIcon,
-          isSelected: singleIcon.icon === iconNode,
-        }));
-        setAllIcons(updatedIcons);
-        updateSelectedIcon(iconNode);
+    // Use setTimeout to defer the state update to the next tick
+    setTimeout(() => {
+      try {
+        const iconNode = convertStringToIcon(icon, allIcons);
+        if (iconNode) {
+          const updatedIcons = allIcons.map((singleIcon) => ({
+            ...singleIcon,
+            isSelected: singleIcon.icon === iconNode,
+          }));
+          setAllIcons(updatedIcons);
+          updateSelectedIcon(iconNode);
+        }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
-    }
+    }, 0);
   };
 
   return (
@@ -113,7 +118,6 @@ export function convertIconToString(icon: ReactNode): string | null {
 }
 
 //function to convert the icon from a string to a React Node
-
 export function convertStringToIcon(
   iconText: string,
   iconsArray: SingleIcon[]
@@ -189,7 +193,7 @@ export function IconDialogBox() {
         <div className="w-full border rounded-lg p-3 flex flex-wrap gap-2 mt-5 justify-center">
           {allIcons.map((singleIcon, index) => (
             <div
-              className={`rounded-md border p-3 hover:bg-primary hover:text-white h-10 w-10 ${
+              className={`rounded-md border p-3 hover:bg-primary hover:text-white h-10 w-10 cursor-pointer ${
                 singleIcon.isSelected
                   ? "bg-primary text-white border-none"
                   : "text-slate-400"
@@ -208,18 +212,18 @@ export function IconDialogBox() {
 
 export default function IconSelector({
   onUpdateIcon,
+  iconToSelected,
 }: {
   onUpdateIcon: (selectedIcon: ReactNode) => void;
+  iconToSelected?: string;
 }) {
   function updatedIcon(selectedIcon: ReactNode) {
     onUpdateIcon(selectedIcon);
-    // const newTask = { name: "task", icon: convertIconToString(selectedIcon) };
-    // console.log(newTask);
   }
 
   return (
     <IconProvider iconsArray={icons} onUpdateIcon={updatedIcon}>
-      <ParentComponent />
+      <ParentComponent iconToSelected={iconToSelected} />
     </IconProvider>
   );
 
@@ -230,7 +234,7 @@ export default function IconSelector({
       if (iconToSelected) {
         triggerIconSelection(iconToSelected);
       }
-    }, [iconToSelected]);
+    }, [iconToSelected, triggerIconSelection]);
 
     return <IconDialogBox />;
   }
