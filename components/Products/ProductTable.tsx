@@ -5,7 +5,6 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Separator } from "../ui/separator";
-import CategoryDropDown from "../CategoryDropDown";
 import {
   ColumnDef,
   flexRender,
@@ -16,6 +15,7 @@ import {
   useReactTable,
   ColumnFiltersState,
   getFilteredRowModel,
+  FilterFn,
 } from "@tanstack/react-table";
 import {
   Table,
@@ -25,15 +25,34 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import PaginationSelection from "./PaginationSelection";
 import { MdFirstPage, MdLastPage } from "react-icons/md";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CategoriesDropDown } from "../CategoryDropDown";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
+
+// Define custom filter types
+declare module "@tanstack/table-core" {
+  interface FilterFns {
+    multiSelect: FilterFn<unknown>;
+  }
+}
+
+// Define the custom filter function
+const multiSelectFilter: FilterFn<unknown> = (
+  row,
+  columnId,
+  filterValue: string[]
+) => {
+  const rowValue = (row.getValue(columnId) as string).toLowerCase();
+  const lowercaseFilterValues = filterValue.map((val) => val.toLowerCase());
+  return filterValue.length === 0 || lowercaseFilterValues.includes(rowValue);
+};
 
 export default function ProductTable<TData, TValue>({
   columns,
@@ -41,6 +60,7 @@ export default function ProductTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
@@ -54,6 +74,9 @@ export default function ProductTable<TData, TValue>({
       sorting,
       columnFilters,
     },
+    filterFns: {
+      multiSelect: multiSelectFilter,
+    },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -62,6 +85,32 @@ export default function ProductTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     onSortingChange: setSorting,
   });
+
+  useEffect(() => {
+    setColumnFilters((prev) => {
+      // Remove both status and category filters
+      const baseFilters = prev.filter((filter) => filter.id !== "category");
+
+      const newFilters = [...baseFilters];
+
+      // Add category filter if there are selected categories
+      if (selectedCategories.length > 0) {
+        newFilters.push({
+          id: "category",
+          value: selectedCategories,
+        });
+      }
+      return newFilters;
+    });
+
+    // Set initial sorting for the "createdAt" column
+    setSorting([
+      {
+        id: "createdAt",
+        desc: true,
+      },
+    ]);
+  }, [selectedCategories]);
 
   return (
     <div className="flex flex-col gap-3 mb-8 mt-6">
@@ -75,12 +124,18 @@ export default function ProductTable<TData, TValue>({
           className="max-w-sm h-10"
         />
         <div>
-          <CategoryDropDown />
+          <CategoriesDropDown
+            selectedCategories={selectedCategories}
+            setSelectedCategories={setSelectedCategories}
+          />
         </div>
       </div>
 
       {/* filtered Area */}
-      <FiltredArea />
+      <FiltredArea
+        selectedCategories={selectedCategories}
+        setSelectedCategories={setSelectedCategories}
+      />
 
       {/* Table */}
       <div className="rounded-md border">
@@ -196,23 +251,48 @@ export default function ProductTable<TData, TValue>({
   );
 }
 
-function FiltredArea() {
+function FiltredArea({
+  selectedCategories,
+  setSelectedCategories,
+}: {
+  selectedCategories: string[];
+  setSelectedCategories: Dispatch<SetStateAction<string[]>>;
+}) {
   return (
     <div className="flex gap-3">
       {/* category */}
-      <div className="border-dashed border rounded-sm p-1 flex gap-2 items-center px-2 text-sm">
-        <span className="text-gray-600 dark:text-gray-300">Category</span>
-        <Separator orientation={"vertical"} />
-        <div className="flex gap-2 items-center">
-          <Badge variant={"secondary"}>Item 1</Badge>
-          <Badge variant={"secondary"}>Item 2</Badge>
+      {selectedCategories.length > 0 && (
+        <div className="border-dashed border rounded-sm p-1 flex gap-2 items-center px-2 text-sm">
+          <span className="text-gray-600 dark:text-gray-300">Category</span>
+          <Separator orientation={"vertical"} />
+          {selectedCategories.length < 6 ? (
+            <>
+              {selectedCategories.map((category, index) => (
+                <Badge key={index} variant={"secondary"}>
+                  {category}
+                </Badge>
+              ))}
+            </>
+          ) : (
+            <>
+              <Badge>{selectedCategories.length} selected</Badge>
+            </>
+          )}
         </div>
-      </div>
+      )}
 
-      <Button variant={"ghost"} className="p-1 px-2">
-        <span>Reset</span>
-        <IoClose />
-      </Button>
+      {selectedCategories.length > 0 && (
+        <Button
+          variant={"ghost"}
+          className="p-1 px-2"
+          onClick={() => {
+            setSelectedCategories([]);
+          }}
+        >
+          <span>Reset</span>
+          <IoClose />
+        </Button>
+      )}
     </div>
   );
 }

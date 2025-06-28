@@ -20,6 +20,11 @@ type Category = {
   label: string;
 };
 
+type CategoriesDropDownProps = {
+  selectedCategories: string[];
+  setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+};
+
 const categories: Category[] = [
   { value: "electronics", label: "Electronics" },
   { value: "furniture", label: "Furniture" },
@@ -33,8 +38,27 @@ const categories: Category[] = [
   { value: "others", label: "Others" },
 ];
 
-export default function CategoryDropDown() {
+export function CategoriesDropDown({
+  selectedCategories,
+  setSelectedCategories,
+}: CategoriesDropDownProps) {
   const [open, setOpen] = useState(false);
+  console.log("categories : ", selectedCategories);
+
+  function handleCheckboxChange(value: string) {
+    setSelectedCategories((prev) => {
+      const updatedCategories = prev.includes(value)
+        ? prev.filter((category) => category !== value)
+        : [...prev, value];
+      console.log("udpated : ", updatedCategories);
+      return updatedCategories;
+    });
+  }
+
+  function clearFilters() {
+    setSelectedCategories([]);
+  }
+
   return (
     <div className="flex items-center space-x-4 poppins">
       <Popover open={open} onOpenChange={setOpen}>
@@ -55,8 +79,8 @@ export default function CategoryDropDown() {
                 {categories.map((category) => (
                   <CommandItem className="h-9" key={category.value}>
                     <Checkbox
-                      //   checked={selectedCategories.includes(category.value)}
-                      //   onClick={() => handleCheckboxChange(category.value)}
+                      checked={selectedCategories.includes(category.value)}
+                      onClick={() => handleCheckboxChange(category.value)}
                       className="size-4 rounded-[4px]"
                     />
                     <div
@@ -71,7 +95,7 @@ export default function CategoryDropDown() {
             <div className="flex flex-col gap-2 text-[23px]">
               <Separator />
               <Button
-                // onClick={clearFilters}
+                onClick={clearFilters}
                 variant={"ghost"}
                 className="text-[12px] mb-1"
               >
