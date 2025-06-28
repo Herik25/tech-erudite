@@ -51,7 +51,21 @@ export const IconProvider = ({
   onUpdateIcon: (selectedIcon: ReactNode) => void;
 }) => {
   const [openDialog, updateOpenDialog] = useState(false);
-  const [allIcons, setAllIcons] = useState<SingleIcon[]>(iconsArray);
+
+  // Initialize with first icon selected by default
+  const [allIcons, setAllIcons] = useState<SingleIcon[]>(() => {
+    if (iconsArray.length > 0) {
+      const initialIcons = iconsArray.map((icon, index) => ({
+        ...icon,
+        isSelected: index === 0, // Select first icon by default
+      }));
+      // Call onUpdateIcon with the first icon
+      setTimeout(() => onUpdateIcon(initialIcons[0].icon), 0);
+      return initialIcons;
+    }
+    return iconsArray;
+  });
+
   const isInitialMount = useRef(true);
 
   const updateSelectedIcon = (icon: ReactNode) => {
