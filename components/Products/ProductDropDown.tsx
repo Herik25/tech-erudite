@@ -1,3 +1,5 @@
+"use client";
+
 import { Row } from "@tanstack/react-table";
 import { Product } from "./columns";
 
@@ -15,9 +17,19 @@ import {
 import { Button } from "@/components/ui/button";
 import { MoreHorizontal } from "lucide-react";
 import { nanoid } from "nanoid";
+import { useProductStore } from "../useProductStore";
+import { JSX } from "react";
+
+type MenuItem = {
+  icon?: JSX.Element;
+  label?: string;
+  className?: string;
+  separator?: boolean;
+};
 
 export default function ProductDropDown({ row }: { row: Row<Product> }) {
-  const menuItems = [
+  const { setSelectedProduct, setOpenDialog } = useProductStore();
+  const menuItems: MenuItem[] = [
     { icon: <MdContentCopy />, label: "Copy", className: "" },
     { icon: <FaRegEdit />, label: "Edit", className: "" },
     { separator: true },
@@ -27,6 +39,13 @@ export default function ProductDropDown({ row }: { row: Row<Product> }) {
       className: "text-red-600",
     },
   ];
+
+  function handleClickedItem(item: MenuItem) {
+    if (item.label === "Delete") {
+      setOpenDialog(true);
+      setSelectedProduct(row.original);
+    }
+  }
 
   return (
     <div>
@@ -45,7 +64,7 @@ export default function ProductDropDown({ row }: { row: Row<Product> }) {
               <DropdownMenuItem
                 key={index}
                 className={`flex items-center gap-1 p-[10px] ${item.className}`}
-                // onClick={() => handleClickedItem(item)}
+                onClick={() => handleClickedItem(item)}
               >
                 {item.icon}
                 <span>{item.label}</span>

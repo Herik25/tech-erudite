@@ -2,6 +2,7 @@ import Header from "./header/Header";
 import { Card } from "@/components/ui/card";
 import TableHead from "@/components/TableHead";
 import { useTheme } from "next-themes";
+import { DeleteDialog } from "@/components/DeleteDialog";
 
 export default function Home() {
   return (
@@ -9,6 +10,7 @@ export default function Home() {
       <Card className="flex flex-col shadow-none p-2">
         <Header />
         <TableHead />
+        <DeleteDialog />
       </Card>
     </div>
   );
