@@ -24,6 +24,7 @@ const ProductSchema = new Schema(
     quantityInStock: { type: Number, required: true, default: 0 },
     price: { type: Number, required: true, default: 0 },
     icon: { type: String }, // optional
+    description: { type: String },
   },
   { timestamps: true }
 );

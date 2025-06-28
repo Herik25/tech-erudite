@@ -52,6 +52,7 @@ const productSchema = z.object({
       return !isNaN(num) && num > 0;
     }, "Price must be greater than 0"),
   icon: z.string().min(1, "Icon is required"),
+  description: z.string().optional(),
 });
 
 type FormData = z.infer<typeof productSchema>;
@@ -80,6 +81,7 @@ import { Separator } from "@/components/ui/separator";
 import { useProductStore } from "../useProductStore";
 import { toast } from "sonner";
 import { getIconComponent, getAvailableIconNames } from "../Products/columns";
+import { Textarea } from "../ui/textarea";
 
 // Simple Icon Selector Component
 const SimpleIconSelector = ({
@@ -180,6 +182,7 @@ export default function ProductDialog() {
         quantity: selectedProduct.quantityInStock?.toString() || "",
         price: selectedProduct.price?.toString() || "",
         icon: selectedProduct.icon || "package",
+        description: selectedProduct.description || "",
       });
     }
   }, [selectedProduct, reset]);
@@ -222,6 +225,7 @@ export default function ProductDialog() {
           quantityInStock: quantity,
           price: price,
           icon: data.icon,
+          description: data.description,
           updatedAt: new Date(),
         };
 
@@ -244,6 +248,7 @@ export default function ProductDialog() {
           quantityInStock: quantity,
           price: price,
           icon: data.icon,
+          description: data.description,
           createdAt: new Date(),
         };
 
@@ -295,7 +300,7 @@ export default function ProductDialog() {
 
           <Separator />
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="p-6 space-y-6">
               {/* Product Name */}
               <div className="space-y-2">
@@ -468,38 +473,67 @@ export default function ProductDialog() {
                   )}
                 </div>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="description">Product Description</Label>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <Textarea
+                      id="description"
+                      {...field}
+                      //   className="w-full rounded-md border border-gray-300 p-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      placeholder="Enter product description"
+                    />
+                  )}
+                />
+                {errors.description && (
+                  <p className="text-sm text-red-500">
+                    {errors.description.message}
+                  </p>
+                )}
+              </div>
             </div>
 
             <Separator />
 
-            <DialogFooter className="p-6 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={isSubmitting || isLoading}
-                className="mr-2"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={isSubmitting || isLoading}
-                className="gap-2"
-              >
-                {isSubmitting || isLoading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    {isEditMode ? "Updating..." : "Adding..."}
-                  </>
-                ) : (
-                  <>
-                    <ShoppingCart size={16} />
-                    {isEditMode ? "Update Product" : "Add Product"}
-                  </>
-                )}
-              </Button>
-            </DialogFooter>
+            <div className="p-6 flex items-center justify-between">
+              {/* Left side warning text */}
+              <p className="text-xs text-yellow-600 italic">
+                *Product name and SKU must be unique
+              </p>
+
+              {/* Right side buttons */}
+              <div className="flex items-center space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  disabled={isSubmitting || isLoading}
+                  className=""
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={isSubmitting || isLoading}
+                  className="gap-2"
+                >
+                  {isSubmitting || isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      {isEditMode ? "Updating..." : "Adding..."}
+                    </>
+                  ) : (
+                    <>
+                      <ShoppingCart size={16} />
+                      {isEditMode ? "Update Product" : "Add Product"}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
           </form>
         </DialogContent>
       </Dialog>

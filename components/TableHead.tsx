@@ -24,7 +24,7 @@ export default function TableHead() {
             <div>
               <CardTitle className="font-bold text-2xl">Products</CardTitle>
               <p className="text-sm text-slate-600 dark:text-gray-300">
-                34 Products
+                {allProducts.length} Products
               </p>
             </div>
             <ProductDialog />

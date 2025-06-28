@@ -33,6 +33,7 @@ export type Product = {
   quantityInStock: number;
   price: number;
   icon: string; // Changed from 'iconName: string' to 'icon: string'
+  description?: string;
   createdAt: Date;
 };
 
@@ -192,6 +193,19 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "supplier",
     header: ({ column }) => <SortableHeader column={column} label="Supplier" />,
+  },
+  {
+    accessorKey: "description",
+    header: "Description",
+    cell: ({ getValue }) => {
+      const desc = getValue<string>();
+      return (
+        <span className="text-sm text-gray-600 dark:text-white">
+          {desc ? (desc.length > 10 ? desc.slice(0, 10) + "…" : desc) : "—"}
+        </span>
+      );
+    },
+    enableSorting: false, // optional, disable sorting if you want
   },
   {
     accessorKey: "actions",

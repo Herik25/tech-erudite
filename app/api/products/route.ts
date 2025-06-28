@@ -4,8 +4,18 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   await connectDB();
-  const { name, supplier, sku, category, quantityInStock, price, icon } =
-    await req.json();
+  const {
+    name,
+    supplier,
+    sku,
+    category,
+    quantityInStock,
+    price,
+    icon,
+    description,
+  } = await req.json();
+
+  console.log("before added : ", { name });
 
   if (!name) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
@@ -20,6 +30,7 @@ export async function POST(req: Request) {
       quantityInStock,
       price,
       icon,
+      description,
     });
     console.log("from body : ", newProduct);
     return NextResponse.json(newProduct, { status: 201 });
