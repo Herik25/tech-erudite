@@ -17,6 +17,7 @@ It supports adding, editing, deleting, and listing products with unique constrai
 ![App Screenshot](assets/screenshot1.png)
 ![App Screenshot](assets/screenshot2.png)
 ![App Screenshot](assets/screenshot3.png)
+![App Screenshot](assets/screenshot4.png)
 
 ---
 
