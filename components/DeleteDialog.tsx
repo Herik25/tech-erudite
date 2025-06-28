@@ -24,7 +24,7 @@ export function DeleteDialog() {
   } = useProductStore();
   async function deleteProductFx() {
     if (selectedProduct) {
-      const result = await deleteProduct(selectedProduct.id);
+      const result = await deleteProduct(selectedProduct._id);
       if (result) {
         toast.error(
           `The product ${selectedProduct.name} has been deleted successfully!`

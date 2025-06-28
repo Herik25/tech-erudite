@@ -13,8 +13,9 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 
+// Updated Product type - icon is now a string
 export type Product = {
-  id: string;
+  _id: string;
   name: string;
   supplier: string;
   sku: string;
@@ -29,11 +30,61 @@ export type Product = {
     | "Home Decor"
     | "Home Appliances"
     | "Others";
-  //   status: "Published" | "Inactive" | "Draft";
   quantityInStock: number;
   price: number;
-  icon: ReactNode;
+  icon: string; // Changed from 'iconName: string' to 'icon: string'
   createdAt: Date;
+};
+
+// Icon mapping - add your icons here
+import {
+  Package,
+  Laptop,
+  Smartphone,
+  Shirt,
+  Book,
+  Palette,
+  Dumbbell,
+  Home,
+  Tv,
+  ShoppingCart,
+  // Add more icons as needed
+} from "lucide-react";
+
+const iconMap: Record<string, ReactNode> = {
+  // Electronics
+  laptop: <Laptop className="h-4 w-4" />,
+  smartphone: <Smartphone className="h-4 w-4" />,
+  tv: <Tv className="h-4 w-4" />,
+
+  // Clothing
+  shirt: <Shirt className="h-4 w-4" />,
+
+  // Books
+  book: <Book className="h-4 w-4" />,
+
+  // Beauty
+  palette: <Palette className="h-4 w-4" />,
+
+  // Sports
+  dumbbell: <Dumbbell className="h-4 w-4" />,
+
+  // Home/Furniture
+  home: <Home className="h-4 w-4" />,
+
+  // Default/Others
+  package: <Package className="h-4 w-4" />,
+  cart: <ShoppingCart className="h-4 w-4" />,
+};
+
+// Helper function to get icon component from name - NOW EXPORTED
+export const getIconComponent = (iconName: string): ReactNode => {
+  return iconMap[iconName] || iconMap.package; // fallback to package icon
+};
+
+// Helper function to get available icon names - NOW EXPORTED
+export const getAvailableIconNames = (): string[] => {
+  return Object.keys(iconMap);
 };
 
 type SortableHeaderProps = {
@@ -76,14 +127,14 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
     cell: ({ row }) => {
-      const Icon = row.original.icon;
+      // Get icon component from icon name
+      const iconComponent = getIconComponent(row.original.icon);
       const name = row.original.name;
       return (
         <div className="flex items-center space-x-2">
           <div className="p-2 rounded-sm bg-primary/10 text-primary">
-            {Icon}
+            {iconComponent}
           </div>
-
           <span>{name}</span>
         </div>
       );
@@ -100,7 +151,14 @@ export const columns: ColumnDef<Product>[] = [
       <SortableHeader column={column} label="Created At" />
     ),
     cell: ({ getValue }) => {
-      const date = getValue<Date>();
+      const dateValue = getValue<Date | string>();
+      const date = dateValue instanceof Date ? dateValue : new Date(dateValue);
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return <span>Invalid Date</span>;
+      }
+
       return (
         <span>
           {date.toLocaleDateString("en-US", {
@@ -115,7 +173,12 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "price",
     header: ({ column }) => <SortableHeader column={column} label="Price" />,
-    cell: ({ getValue }) => `$${getValue<number>().toFixed(2)}`,
+    cell: ({ getValue }) => {
+      const price = getValue<number>();
+      return price !== undefined && price !== null
+        ? `$${price.toFixed(2)}`
+        : "$0.00";
+    },
   },
   {
     accessorKey: "category",

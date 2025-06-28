@@ -16,7 +16,7 @@ export type ProductCategory =
   | "Home Appliances"
   | "Others";
 
-// Zod schema for form validation
+// Updated Zod schema - fixed validation
 const productSchema = z.object({
   productName: z.string().min(1, "Product name is required").trim(),
   sku: z
@@ -50,8 +50,8 @@ const productSchema = z.object({
     .refine((val) => {
       const num = parseFloat(val);
       return !isNaN(num) && num > 0;
-    }, "Price must be a greater than 0 "),
-  selectedIcon: z.any().nullable().optional(),
+    }, "Price must be greater than 0"),
+  icon: z.string().min(1, "Icon is required"),
 });
 
 type FormData = z.infer<typeof productSchema>;
@@ -77,9 +77,49 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import IconSelector from "./IconSelector";
 import { useProductStore } from "../useProductStore";
 import { toast } from "sonner";
+import { getIconComponent, getAvailableIconNames } from "../Products/columns";
+
+// Simple Icon Selector Component
+const SimpleIconSelector = ({
+  selectedIcon,
+  onIconSelect,
+}: {
+  selectedIcon: string;
+  onIconSelect: (iconName: string) => void;
+}) => {
+  const iconNames = getAvailableIconNames();
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap justify-center gap-2 p-3 border rounded-lg max-h-32 overflow-y-auto">
+        {iconNames.map((iconName) => (
+          <button
+            key={iconName}
+            type="button"
+            onClick={() => onIconSelect(iconName)}
+            className={`p-2 flex items-center justify-center cursor-pointer w-12 h-12 border rounded hover:bg-gray-100 hover:text-black transition-colors ${
+              selectedIcon === iconName
+                ? "bg-primary text-white border-primary"
+                : "border-gray-200"
+            }`}
+            title={iconName.charAt(0).toUpperCase() + iconName.slice(1)}
+          >
+            {getIconComponent(iconName)}
+          </button>
+        ))}
+      </div>
+      <div className="flex items-center gap-2 text-sm text-gray-600">
+        <span>Selected:</span>
+        <div className="flex items-center gap-1">
+          {getIconComponent(selectedIcon)}
+          <span className="capitalize">{selectedIcon}</span>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default function ProductDialog() {
   const {
@@ -122,12 +162,12 @@ export default function ProductDialog() {
       category: "Electronics",
       quantity: "",
       price: "",
-      selectedIcon: null,
+      icon: "package",
     },
   });
 
-  //   Watch for selectedIcon changes
-  //   const selectedIcon = watch("selectedIcon");
+  // Watch for icon changes
+  const selectedIconName = watch("icon");
 
   useEffect(() => {
     if (selectedProduct) {
@@ -139,24 +179,37 @@ export default function ProductDialog() {
         category: selectedProduct.category || "Electronics",
         quantity: selectedProduct.quantityInStock?.toString() || "",
         price: selectedProduct.price?.toString() || "",
-        selectedIcon: selectedProduct.icon || null,
+        icon: selectedProduct.icon || "package",
       });
-      
     }
   }, [selectedProduct, reset]);
 
-  const handleIconChange = (icon: React.ReactNode): void => {
-    setValue("selectedIcon", icon);
+  const handleIconChange = (iconName: string): void => {
+    setValue("icon", iconName);
   };
 
   const onSubmit = async (data: FormData): Promise<void> => {
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      console.log("Form data received:", data); // Debug log
 
-      // Convert string values to numbers
+      // Validate and convert data
       const quantity = parseInt(data.quantity, 10);
       const price = parseFloat(data.price);
+
+      console.log("Converted values:", { quantity, price }); // Debug log
+
+      if (isNaN(quantity) || quantity <= 0) {
+        toast.error("Invalid quantity value");
+        return;
+      }
+
+      if (isNaN(price) || price <= 0) {
+        toast.error("Invalid price value");
+        return;
+      }
+
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       if (selectedProduct) {
         // Update existing product
@@ -168,35 +221,40 @@ export default function ProductDialog() {
           category: data.category,
           quantityInStock: quantity,
           price: price,
-          icon: data.selectedIcon,
+          icon: data.icon,
           updatedAt: new Date(),
         };
 
+        console.log("Updated product:", updatedProduct); // Debug log
         const result = await updateProduct(updatedProduct);
-        if (result) {
+        if (result.success) {
           toast.success("Product updated successfully!");
           handleClose();
+        } else {
+          toast.error("Failed to update product. Please try again.");
         }
       } else {
         // Create new product
         const newProduct = {
-          id: Date.now().toString(),
+          _id: Date.now().toString(),
           name: data.productName,
           sku: data.sku,
           supplier: data.supplier,
           category: data.category,
           quantityInStock: quantity,
           price: price,
-          icon: data.selectedIcon,
+          icon: data.icon,
           createdAt: new Date(),
         };
 
-        console.log("New Product Created:", newProduct);
+        console.log("New Product Created:", newProduct); // Debug log
         const result = await addProduct(newProduct);
 
-        if (result) {
+        if (result.success) {
           toast.success("Product added successfully!");
           handleClose();
+        } else {
+          toast.error("Failed to add product. Please try again.");
         }
       }
     } catch (error) {
@@ -223,7 +281,7 @@ export default function ProductDialog() {
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-[600px] p-0">
+        <DialogContent className="sm:max-w-[700px] p-0 max-h-[90vh] overflow-y-auto">
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="text-2xl">
               {isEditMode ? "Edit Product" : "Add Product"}
@@ -239,33 +297,46 @@ export default function ProductDialog() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="p-6 space-y-6">
-              {/* Product Name & Icon Row */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                <div className="md:col-span-12 space-y-2">
-                  <Label htmlFor="productName">Product Name *</Label>
-                  <div className="grid grid-cols-[1fr_auto] gap-4">
-                    <Controller
-                      name="productName"
-                      control={control}
-                      render={({ field }) => (
-                        <Input
-                          {...field}
-                          id="productName"
-                          placeholder="Enter product name"
-                          className={`h-11 ${
-                            errors.productName ? "border-red-500" : ""
-                          }`}
-                        />
-                      )}
+              {/* Product Name */}
+              <div className="space-y-2">
+                <Label htmlFor="productName">Product Name *</Label>
+                <Controller
+                  name="productName"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      id="productName"
+                      placeholder="Enter product name"
+                      className={`h-11 ${
+                        errors.productName ? "border-red-500" : ""
+                      }`}
                     />
-                    <IconSelector onUpdateIcon={handleIconChange} />
-                  </div>
-                  {errors.productName && (
-                    <p className="text-sm text-red-500">
-                      {errors.productName.message}
-                    </p>
                   )}
-                </div>
+                />
+                {errors.productName && (
+                  <p className="text-sm text-red-500">
+                    {errors.productName.message}
+                  </p>
+                )}
+              </div>
+
+              {/* Icon Selection */}
+              <div className="space-y-2">
+                <Label>Product Icon *</Label>
+                <Controller
+                  name="icon"
+                  control={control}
+                  render={({ field }) => (
+                    <SimpleIconSelector
+                      selectedIcon={field.value}
+                      onIconSelect={field.onChange}
+                    />
+                  )}
+                />
+                {errors.icon && (
+                  <p className="text-sm text-red-500">{errors.icon.message}</p>
+                )}
               </div>
 
               {/* SKU */}
@@ -279,7 +350,7 @@ export default function ProductDialog() {
                       {...field}
                       id="sku"
                       placeholder="Enter SKU"
-                      className={errors.sku ? "border-red-500" : ""}
+                      className={`h-11 ${errors.sku ? "border-red-500" : ""}`}
                     />
                   )}
                 />
@@ -300,7 +371,9 @@ export default function ProductDialog() {
                         {...field}
                         id="supplier"
                         placeholder="Enter supplier name"
-                        className={errors.supplier ? "border-red-500" : ""}
+                        className={`h-11 ${
+                          errors.supplier ? "border-red-500" : ""
+                        }`}
                       />
                     )}
                   />
@@ -312,7 +385,7 @@ export default function ProductDialog() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="category">Category</Label>
+                  <Label htmlFor="category">Category *</Label>
                   <Controller
                     name="category"
                     control={control}
@@ -321,7 +394,7 @@ export default function ProductDialog() {
                         value={field.value}
                         onValueChange={field.onChange}
                       >
-                        <SelectTrigger>
+                        <SelectTrigger className="h-11">
                           <SelectValue placeholder="Select a category" />
                         </SelectTrigger>
                         <SelectContent>
@@ -334,6 +407,11 @@ export default function ProductDialog() {
                       </Select>
                     )}
                   />
+                  {errors.category && (
+                    <p className="text-sm text-red-500">
+                      {errors.category.message}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -349,9 +427,11 @@ export default function ProductDialog() {
                         {...field}
                         id="quantity"
                         type="number"
-                        min="0"
+                        min="1"
                         placeholder="Enter quantity"
-                        className={errors.quantity ? "border-red-500" : ""}
+                        className={`h-11 ${
+                          errors.quantity ? "border-red-500" : ""
+                        }`}
                       />
                     )}
                   />
@@ -372,10 +452,12 @@ export default function ProductDialog() {
                         {...field}
                         id="price"
                         type="number"
-                        min="0"
+                        min="0.01"
                         step="0.01"
                         placeholder="Enter price"
-                        className={errors.price ? "border-red-500" : ""}
+                        className={`h-11 ${
+                          errors.price ? "border-red-500" : ""
+                        }`}
                       />
                     )}
                   />

@@ -1,7 +1,7 @@
 "use client";
 
 import { nanoid } from "nanoid";
-import { Product } from "./columns";
+// import { Product } from "./columns";
 import {
   MdInventory,
   MdBuild,
@@ -17,7 +17,7 @@ import { FaBed, FaHeadphones, FaTv } from "react-icons/fa";
 import { IoTabletPortrait } from "react-icons/io5";
 import { GiSofa } from "react-icons/gi";
 
-export const products: Product[] = [
+export const products = [
   {
     id: nanoid(),
     name: "Screwdriver",
