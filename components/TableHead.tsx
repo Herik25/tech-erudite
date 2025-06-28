@@ -1,3 +1,4 @@
+import ProductDialog from "./ProductDialog/ProductDialog";
 import { columns } from "./Products/columns";
 import { products } from "./Products/productData";
 import ProductTable from "./Products/ProductTable";
@@ -16,7 +17,7 @@ export default function TableHead() {
                 34 Products
               </p>
             </div>
-            <Button>Add Product</Button>
+            <ProductDialog />
           </div>
         </CardHeader>
         <CardContent>
