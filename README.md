@@ -1,36 +1,109 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Product Inventory Management
 
-## Getting Started
+A full-stack product inventory management system built with **MongoDB** (Mongoose) for the backend, and **React** frontend using **Zustand**, **Tailwind CSS**, **shadcn UI**, **React Hook Form**, **Zod**, and **TanStack Table**.  
+It supports adding, editing, deleting, and listing products with unique constraints on product name and SKU, optional description, icon selection, and category filtering.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Technologies Used
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Backend: MongoDB with Mongoose schema modeling and Next.js API routes
+- Frontend: React with Zustand state management, Tailwind CSS styling, shadcn UI components, React Hook Form & Zod for validation, TanStack Table for data grid
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Pictures
 
-## Learn More
+![App Screenshot](assets/screenshot1.png)
+![App Screenshot](assets/screenshot2.png)
+![App Screenshot](assets/screenshot3.png)
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Clone the repository**
 
-## Deploy on Vercel
+   ```bash
+   git clone <repository-url>
+   cd <repository-folder>
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+2. **Install dependencies**
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+   ```bash
+   npm install
+   ```
+
+3. **Setup environment variables**
+
+   ```bash
+   MONGODB_URI=your_mongodb_connection_string_here
+   ```
+
+4. **Run the development server**
+
+   ```bash
+   npm run dev
+   ```
+
+5. **Open the app**
+
+   Open your browser and navigate to: [http://localhost:3000](http://localhost:3000) to see the application.
+
+---
+
+## Implementation Overview
+
+### Backend
+
+- **MongoDB** is used as the database to store product data.
+- **Mongoose** handles schema definitions and interactions with the database.
+- The backend exposes API routes for:
+  - `GET` to fetch products with optional filters.
+  - `POST` to add new products.
+  - `PUT` to update existing products.
+  - `DELETE` to remove products.
+
+### Frontend
+
+- Built with **React** and **TypeScript**.
+- State management is handled by **Zustand** for simplicity and scalability.
+- Styling is done using **Tailwind CSS** and components from **shadcn UI**.
+- Forms are managed with **React Hook Form** and validated using **Zod** schemas.
+- Data tables are implemented using **TanStack Table** for powerful sorting and filtering.
+- Product icons use **lucide-react** icon library.
+
+This setup ensures a modern, scalable, and maintainable full-stack product inventory application.
+
+---
+
+## API Routes
+
+- `GET /api/products`  
+  Fetch all products, with optional query parameters for searching by name and filtering by categories.
+
+- `POST /api/products`  
+  Add a new product. Requires fields like `name`, `sku`, `supplier`, `category`, `quantityInStock`, `price`, `icon`, and optional `description`.  
+  Validates uniqueness of `name` and `sku`.
+
+- `PUT /api/products/:id`  
+  Update an existing product by its ID.
+
+- `DELETE /api/products/:id`  
+  Remove a product by its ID.
+
+---
+
+## Summary
+
+This project is a full-stack inventory management system that uses:
+
+- **MongoDB** with **Mongoose** for backend data storage and schema enforcement.
+- **Next.js API Routes** for backend API endpoints.
+- **React** with **Zustand** for efficient state management on the frontend.
+- **Tailwind CSS** and **shadcn UI** for sleek, responsive styling.
+- **React Hook Form** and **Zod** for robust form handling and validation.
+- **TanStack Table** for advanced table features like sorting and filtering.
+
+The app supports product CRUD operations with validation and includes icon selection for products. It’s designed to be scalable, maintainable, and developer-friendly.
