@@ -10,6 +10,7 @@ import {
   ColumnDef,
   flexRender,
   getCoreRowModel,
+  getPaginationRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import {
@@ -20,6 +21,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useState } from "react";
+import PaginationSelection from "./PaginationSelection";
+import { MdFirstPage, MdLastPage } from "react-icons/md";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -30,10 +35,20 @@ export default function ProductTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const table = useReactTable({
     data,
     columns,
+    state: {
+      pagination,
+    },
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   return (
@@ -98,6 +113,65 @@ export default function ProductTable<TData, TValue>({
             )}
           </TableBody>
         </Table>
+      </div>
+
+      {/* pagination */}
+      <div className="flex items-center justify-between mt-5">
+        <PaginationSelection
+          pagination={pagination}
+          setPagination={setPagination}
+        />
+
+        <div className="flex gap-6 items-center">
+          <span className="text-sm">
+            Page {pagination.pageIndex + 1} of {table.getPageCount()}
+          </span>
+          <div className="flex items-center justify-end space-x-2 py-4">
+            {/* First page */}
+            <Button
+              variant={"outline"}
+              className="size-9 w-12"
+              size={"sm"}
+              onClick={() => table.setPageIndex(0)}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <MdFirstPage />
+            </Button>
+
+            {/* Previous Page */}
+            <Button
+              variant={"outline"}
+              className="size-9 w-12"
+              size={"sm"}
+              onClick={() => table.previousPage()}
+              disabled={!table.getCanPreviousPage()}
+            >
+              <ChevronLeft />
+            </Button>
+
+            {/* Next Page */}
+            <Button
+              variant={"outline"}
+              className="size-9 w-12"
+              size={"sm"}
+              onClick={() => table.nextPage()}
+              disabled={!table.getCanNextPage()}
+            >
+              <ChevronRight />
+            </Button>
+
+            {/* Last Page */}
+            <Button
+              variant={"outline"}
+              className="size-9 w-12"
+              size={"sm"}
+              onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+              disabled={!table.getCanNextPage()}
+            >
+              <MdLastPage />
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
