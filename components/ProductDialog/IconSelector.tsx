@@ -179,7 +179,7 @@ export function IconDialogBox() {
           {allIcons.find((icon) => icon.isSelected)?.icon}
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl mt-5">
+      <DialogContent className="md:max-w-2xl mt-5">
         <DialogHeader>
           <DialogTitle>Select an Icon</DialogTitle>
           <DialogDescription>

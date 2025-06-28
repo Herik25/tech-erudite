@@ -3,16 +3,16 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MdError } from "react-icons/md";
-import { useForm } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 export default function Quantity() {
   const {
     register,
     formState: { errors },
-  } = useForm();
+  } = useFormContext();
   return (
     <div className=" flex flex-col gap-2 pt-[6px]">
-      <Label htmlFor="quantity" className="text-slate-600">
+      <Label htmlFor="quantity" className="text-slate-600 dark:text-gray-300">
         {`Quantity`}
       </Label>
       <Input

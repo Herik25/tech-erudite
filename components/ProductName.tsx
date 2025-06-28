@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MdError } from "react-icons/md";
-import { useForm } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 import { ReactNode } from "react";
 import IconSelector from "./ProductDialog/IconSelector";
 export default function ProductName({
@@ -15,14 +15,17 @@ export default function ProductName({
   const {
     register,
     formState: { errors },
-  } = useForm();
+  } = useFormContext();
 
   function getSelectedIcon(selectedIcon: ReactNode) {
     onSelectedIcon(selectedIcon);
   }
   return (
     <div className="mt-5 flex flex-col gap-2">
-      <Label htmlFor="product-name" className="text-slate-600">
+      <Label
+        htmlFor="product-name"
+        className="text-slate-600 dark:text-gray-300"
+      >
         {`Product's Name`}
       </Label>
       <div className="flex gap-2 items-center">

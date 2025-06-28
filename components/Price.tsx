@@ -4,17 +4,17 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { MdError } from "react-icons/md";
 import { NumericFormat } from "react-number-format";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 export default function Price() {
   const {
     control,
     formState: { errors },
-  } = useForm();
+  } = useFormContext();
 
   return (
     <div className="flex flex-col gap-2 pt-[6px]">
-      <Label htmlFor="price" className="text-slate-600">
+      <Label htmlFor="price" className="text-slate-600 dark:text-gray-300">
         Price
       </Label>
       <Controller
